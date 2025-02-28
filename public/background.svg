@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.3.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1440 629" style="enable-background:new 0 0 1440 629;" xml:space="preserve">
+<style type="text/css">
+	.st0{filter:url(#Adobe_OpacityMaskFilter);}
+	.st1{mask:url(#SVGID_1_);}
+	
+		.st2{fill:#F6EBD9;filter:url(#Adobe_OpacityMaskFilter_00000065787033872715997700000014282901631447493012_);stroke:#000000;stroke-width:4;}
+	.st3{mask:url(#mask0_254_553_00000054232973306163064470000005339554893233602458_);}
+	.st4{fill:#FF9619;stroke:#000000;stroke-width:12;}
+	.st5{fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:10;}
+</style>
+<defs>
+	<filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="-1020.5" y="-657.9" width="3481" height="4772">
+		
+			<feColorMatrix  type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0" color-interpolation-filters="sRGB" result="source"/>
+		<feFlood  style="flood-color:white;flood-opacity:1" result="back"/>
+		<feBlend  in="source" in2="back" mode="normal"/>
+	</filter>
+</defs>
+<mask maskUnits="userSpaceOnUse" x="-1020.5" y="-657.9" width="3481" height="4772" id="SVGID_1_">
+	<g class="st0">
+	</g>
+</mask>
+<g class="st1">
+	<defs>
+		
+			<filter id="Adobe_OpacityMaskFilter_00000168815362079164245900000012981000654492340908_" filterUnits="userSpaceOnUse" x="-1020.5" y="-657.9" width="3481" height="4772">
+			<feColorMatrix  type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+		</filter>
+	</defs>
+	
+		<mask maskUnits="userSpaceOnUse" x="-1020.5" y="-657.9" width="3481" height="4772" id="mask0_254_553_00000054232973306163064470000005339554893233602458_">
+		
+			<path style="fill:#F6EBD9;filter:url(#Adobe_OpacityMaskFilter_00000168815362079164245900000012981000654492340908_);stroke:#000000;stroke-width:4;" d="
+			M720,1619.1c478.6,0,912.1-90.4,1225.9-236.7c313.7-146.2,508.6-348.6,508.6-572.8c0-224.2-194.9-426.6-508.6-572.8
+			C1632.1,90.5,1198.6,0.1,720,0.1c-478.6,0-912.1,90.4-1225.9,236.7c-313.7,146.2-508.6,348.6-508.6,572.8
+			c0,224.2,194.9,426.6,508.6,572.8C-192.1,1528.7,241.4,1619.1,720,1619.1z"/>
+	</mask>
+	<g class="st3">
+		<path class="st4" d="M720,1619.1c478.6,0,912.1-90.4,1225.9-236.7c313.7-146.2,508.6-348.6,508.6-572.8
+			c0-224.2-194.9-426.6-508.6-572.8C1632.1,90.5,1198.6,0.1,720,0.1c-478.6,0-912.1,90.4-1225.9,236.7
+			c-313.7,146.2-508.6,348.6-508.6,572.8c0,224.2,194.9,426.6,508.6,572.8C-192.1,1528.7,241.4,1619.1,720,1619.1z"/>
+		<rect x="-249.5" y="-655.9" class="st5" width="2000" height="4768"/>
+	</g>
+	
+		<image style="overflow:visible;" width="1440" height="1980" xlink:href="../../../../Desktop/Noise-hero-bg.png"  transform="matrix(1 0 0 1 0 -312.4319)">
+	</image>
+</g>
+</svg>
