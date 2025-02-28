@@ -1,47 +1,29 @@
-# netlify.toml
+# netlify.toml for Next.js project
 
 [build]
-  # Base directory is the repository root (no need to change this if your project files are in the root)
+  # Base directory (repo root)
   base = ""
 
-  # Directory that contains the deploy-ready HTML files and assets.
-  publish = "build"
+  # The directory where your built Next.js app is located
+  # For Next.js apps, this is usually ".next" (when using server-side rendering)
+  # or "out" (when using static export)
+  publish = ".next"
 
-  # Default build command.
+  # Default build command
   command = "npm run build"
 
 [build.environment]
   NODE_VERSION = "20.13.1"
+  NEXT_TELEMETRY_DISABLED = "1"
 
-# Production context: All deploys from the main
-# repository branch will inherit these settings.
-[context.production]
-  command = "npm run build"
+# Use the Next.js plugin
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
-# Deploy Preview context: 
-# All deploys resulting from a pull/merge request
-# will inherit these settings.
-[context.deploy-preview]
-  command = "npm run build:preview"
-
-# Branch deploy context: All deploys that are not from
-# a pull/merge request or from the production branch
-# will inherit these settings.
-[context.branch-deploy]
-  command = "npm run build:branch"
-
-# Redirects and rewrites
+# Redirects and rewrites (typically handled by Next.js, but can add custom rules here)
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/next"
   status = 200
-
-# Headers to set on specific paths
-[[headers]]
-  for = "/*"
-    [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-# Asset optimization
-[build.processing]
-  skip_processing = false
+  force = true
+  conditions = {Role = ["anonymous"]}
