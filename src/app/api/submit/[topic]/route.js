@@ -14,7 +14,7 @@ export const config = {
 
 export async function POST(request, { params }) {
   try {
-    const { topic } =params;
+    const { topic } = params;
 
     if (!topic) {
       return NextResponse.json(
@@ -26,12 +26,9 @@ export async function POST(request, { params }) {
     let id;
     if (topic === "Lecture1") {
       id = process.env.GOOGLE_SHEET_ID;
-    }
-    
-    if (topic === "AutoCAD Design Competition") {
+    } else if (topic === "AutoCAD Design Competition") {
       id = process.env.WORKSHOP_SHEET_ID;
-    }
-    else {
+    } else {
       id = process.env.GOOGLE_SHEET_ID2;
     }
 
@@ -116,33 +113,32 @@ export async function POST(request, { params }) {
 async function uploadImageToDrive(auth, filePath, fileName) {
   const drive = google.drive({ version: "v3", auth });
 
+  console.log("Drive Upload Path:", filePath);
+  console.log("Drive File Name:", fileName);
+  console.log("Drive Parent ID:", process.env.GOOGLE_DRIVE_ID);
+
   const fileMetadata = { name: fileName, parents: [process.env.GOOGLE_DRIVE_ID] };
   const media = {
     mimeType: "image/jpeg",
     body: fs.createReadStream(filePath),
   };
 
-  let retries = 3;
-  while (retries > 0) {
-    try {
-      const file = await drive.files.create({
-        resource: fileMetadata,
-        media,
-        fields: "id",
-      });
+  try {
+    const file = await drive.files.create({
+      resource: fileMetadata,
+      media,
+      fields: "id",
+    });
 
-      await drive.permissions.create({
-        fileId: file.data.id,
-        requestBody: { role: "reader", type: "anyone" },
-      });
+    await drive.permissions.create({
+      fileId: file.data.id,
+      requestBody: { role: "reader", type: "anyone" },
+    });
 
-      const fileUrl = `https://drive.google.com/uc?id=${file.data.id}`;
-      return fileUrl;
-    } catch (error) {
-      console.error("Drive upload error (retries left:", retries, "):", error);
-      retries--;
-      if (retries === 0) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 5000)); 
-    }
+    const fileUrl = `https://drive.google.com/uc?id=${file.data.id}`;
+    return fileUrl;
+  } catch (error) {
+    console.error("Drive upload error:", error);
+    throw error;
   }
 }
