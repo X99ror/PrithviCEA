@@ -1,29 +1,34 @@
-# netlify.toml for Next.js project
+# Netlify configuration for Next.js project
 
 [build]
-  # Base directory (repo root)
-  base = ""
-
-  # The directory where your built Next.js app is located
-  # For Next.js apps, this is usually ".next" (when using server-side rendering)
-  # or "out" (when using static export)
-  publish = ".next"
-
-  # Default build command
   command = "npm run build"
+  base = ""
 
 [build.environment]
   NODE_VERSION = "20.13.1"
   NEXT_TELEMETRY_DISABLED = "1"
 
-# Use the Next.js plugin
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Redirects and rewrites (typically handled by Next.js, but can add custom rules here)
+# Cache static assets for faster loads
+[[headers]]
+  for = "/_next/static/*"
+    [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/static/*"
+    [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/api/*"
+    [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
+
+# Redirects to Next.js function (only if SSR is used)
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/next"
   status = 200
-  force = true
-  conditions = {Role = ["anonymous"]}
