@@ -1,8 +1,7 @@
-# Netlify configuration for Next.js project
-
 [build]
   command = "npm run build"
   base = ""
+  publish = ".next" # ✅ This is correct for Next.js
 
 [build.environment]
   NODE_VERSION = "20.13.1"
@@ -11,7 +10,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Cache static assets for faster loads
 [[headers]]
   for = "/_next/static/*"
     [headers.values]
@@ -27,7 +25,6 @@
     [headers.values]
     Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
 
-# Redirects to Next.js function (only if SSR is used)
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/next"
