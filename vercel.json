@@ -2,12 +2,12 @@
     "version": 2,
     "builds": [
       {
-        "src": "api/submit/*",
+        "src": "api/submit/[topic]/route.js",
         "use": "@vercel/node"
       }
     ],
     "functions": {
-      "api/submit/*": {
+      "api/submit/[topic]/route.js": {
         "maxDuration": 30
       }
     }
