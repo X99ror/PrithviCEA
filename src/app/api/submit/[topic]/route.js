@@ -44,7 +44,7 @@ export async function POST(request, { params }) {
       );
     }
 
-
+    const submissionDate = new Date().toLocaleString();
     const bytes = await paymentProof.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -66,7 +66,7 @@ export async function POST(request, { params }) {
     const sheets = google.sheets({ auth, version: "v4" });
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: id,
-      range: "A1:G1",
+      range: "A1:H1",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [
@@ -78,6 +78,7 @@ export async function POST(request, { params }) {
             instituteId,
             instituteName,
             imageUrl,
+            submissionDate,
           ],
         ],
       },
