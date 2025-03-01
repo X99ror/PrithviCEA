@@ -58,9 +58,17 @@ export async function POST(request, { params }) {
     const imageUrl = await uploadImageToDrive(auth, paymentProof);
 
     const sheets = google.sheets({ auth, version: "v4" });
+
+    const lastRow = await sheets.spreadsheets.values.get({
+      spreadsheetId: id,
+      range: "Sheet1!A:A",
+    });
+    const nextRow = lastRow.data.values ? lastRow.data.values.length + 1 : 1;
+
+
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: id,
-      range: "A1:G1",
+      range: `Sheet1!A${nextRow}:G${nextRow}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[name, email, number, alternateNumber, instituteId, instituteName, imageUrl]],
@@ -85,7 +93,10 @@ async function uploadImageToDrive(auth, paymentProof) {
   const drive = google.drive({ version: "v3", auth });
 
   const fileMetadata = { name: paymentProof.name, parents: [process.env.GOOGLE_DRIVE_ID] };
-  const media = { mimeType: paymentProof.type, body: paymentProof.stream() };
+  const media = {
+    mimeType: paymentProof.type,
+    body: paymentProof.stream ? paymentProof.stream() : paymentProof.buffer(), // Fallback to buffer if stream doesn't work
+  };
 
   let retries = 3;
   while (retries > 0) {
@@ -96,17 +107,19 @@ async function uploadImageToDrive(auth, paymentProof) {
         fields: "id",
       });
 
+    
       await drive.permissions.create({
         fileId: file.data.id,
         requestBody: { role: "reader", type: "anyone" },
       });
 
+ 
       return `https://drive.google.com/uc?id=${file.data.id}`;
     } catch (error) {
       console.error("Drive upload error (retries left:", retries, "):", error);
       retries--;
       if (retries === 0) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Retry after a delay
     }
   }
 }
