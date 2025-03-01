@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 export const config = {
   api: {
@@ -43,19 +44,25 @@ export async function POST(request, { params }) {
       );
     }
 
-    // Just get the file name without uploading to Drive
-    const paymentProofName = paymentProof.name || "payment_proof";
 
-    // Set up Google Auth
+    const bytes = await paymentProof.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    
+    const imageUrl = await uploadImageToCloudinary(buffer, paymentProof.name);
+    console.log("Image uploaded to Cloudinary:", imageUrl);
+
+   
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
         private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
       },
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+      scopes: [
+        "https://www.googleapis.com/auth/spreadsheets",
+      ],
     });
 
-    // Add data to Google Sheet
     const sheets = google.sheets({ auth, version: "v4" });
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: id,
@@ -70,7 +77,7 @@ export async function POST(request, { params }) {
             alternateNumber,
             instituteId,
             instituteName,
-            paymentProofName, // Just using the file name instead of Drive URL
+            imageUrl,
           ],
         ],
       },
@@ -79,18 +86,12 @@ export async function POST(request, { params }) {
     return NextResponse.json({
       status: 200,
       success: true,
-      message: "Registration successful!",
       data: response.data,
     });
   } catch (error) {
-    console.error("Google Sheets Error:", error);
+    console.error("Error in POST function:", error);
     return NextResponse.json(
-      { 
-        status: 500, 
-        success: false, 
-        message: "Something went wrong", 
-        error: error.message 
-      },
+      { status: 500, success: false, message: "Something went wrong" },
       { status: 500 }
     );
   }
