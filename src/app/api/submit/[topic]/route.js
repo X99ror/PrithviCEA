@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
-import { writeFile } from "fs/promises";
-import { join } from "path";
-import { mkdir } from "fs/promises";
-import fs from "fs";
-import path from "path";
 
 export const config = {
   api: {
@@ -14,7 +9,7 @@ export const config = {
 
 export async function POST(request, { params }) {
   try {
-    const { topic } =params;
+    const { topic } = params;
 
     if (!topic) {
       return NextResponse.json(
@@ -26,12 +21,9 @@ export async function POST(request, { params }) {
     let id;
     if (topic === "Lecture1") {
       id = process.env.GOOGLE_SHEET_ID;
-    }
-    
-    if (topic === "AutoCAD Design Competition") {
+    } else if (topic === "AutoCAD Design Competition") {
       id = process.env.WORKSHOP_SHEET_ID;
-    }
-    else {
+    } else {
       id = process.env.GOOGLE_SHEET_ID2;
     }
 
@@ -63,21 +55,7 @@ export async function POST(request, { params }) {
       ],
     });
 
-    const bytes = await paymentProof.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const uploadDir = path.join(process.cwd(), "uploads");
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (error) {
-      console.error("Error creating directory:", error);
-    }
-
-    const filePath = path.join(uploadDir, paymentProof.name);
-    await writeFile(filePath, buffer);
-
-    const imageUrl = await uploadImageToDrive(auth, filePath, paymentProof.name);
-
-    fs.unlinkSync(filePath);
+    const imageUrl = await uploadImageToDrive(auth, paymentProof);
 
     const sheets = google.sheets({ auth, version: "v4" });
     const response = await sheets.spreadsheets.values.append({
@@ -85,17 +63,7 @@ export async function POST(request, { params }) {
       range: "A1:G1",
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [
-          [
-            name,
-            email,
-            number,
-            alternateNumber,
-            instituteId,
-            instituteName,
-            imageUrl,
-          ],
-        ],
+        values: [[name, email, number, alternateNumber, instituteId, instituteName, imageUrl]],
       },
     });
 
@@ -113,14 +81,11 @@ export async function POST(request, { params }) {
   }
 }
 
-async function uploadImageToDrive(auth, filePath, fileName) {
+async function uploadImageToDrive(auth, paymentProof) {
   const drive = google.drive({ version: "v3", auth });
 
-  const fileMetadata = { name: fileName, parents: [process.env.GOOGLE_DRIVE_ID] };
-  const media = {
-    mimeType: "image/jpeg",
-    body: fs.createReadStream(filePath),
-  };
+  const fileMetadata = { name: paymentProof.name, parents: [process.env.GOOGLE_DRIVE_ID] };
+  const media = { mimeType: paymentProof.type, body: paymentProof.stream() };
 
   let retries = 3;
   while (retries > 0) {
@@ -136,13 +101,12 @@ async function uploadImageToDrive(auth, filePath, fileName) {
         requestBody: { role: "reader", type: "anyone" },
       });
 
-      const fileUrl = `https://drive.google.com/uc?id=${file.data.id}`;
-      return fileUrl;
+      return `https://drive.google.com/uc?id=${file.data.id}`;
     } catch (error) {
       console.error("Drive upload error (retries left:", retries, "):", error);
       retries--;
       if (retries === 0) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 5000)); 
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 }
