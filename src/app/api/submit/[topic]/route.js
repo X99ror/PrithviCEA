@@ -9,7 +9,10 @@ export const config = {
 
 export async function POST(request, { params }) {
   try {
+    console.log("Request received");
+
     const { topic } = params;
+    console.log("Topic:", topic);
 
     if (!topic) {
       return NextResponse.json(
@@ -26,8 +29,11 @@ export async function POST(request, { params }) {
     } else {
       id = process.env.GOOGLE_SHEET_ID2;
     }
+    console.log("Sheet ID:", id);
 
     const formData = await request.formData();
+    console.log("Form data parsed");
+
     const name = formData.get("name");
     const email = formData.get("email");
     const number = formData.get("number");
@@ -36,12 +42,48 @@ export async function POST(request, { params }) {
     const instituteName = formData.get("instituteName");
     const paymentProof = formData.get("paymentProof");
 
+    console.log("Extracted form data");
+
     if (!paymentProof) {
       return NextResponse.json(
         { message: "Payment proof upload is required", success: false },
         { status: 400 }
       );
     }
+
+    console.log("Payment proof found");
+
+    return NextResponse.json({
+      status: 200,
+      success: true,
+      message: "Processing your request, you will be notified soon.",
+    });
+
+    await addToQueue({
+      name,
+      email,
+      number,
+      alternateNumber,
+      instituteId,
+      instituteName,
+      paymentProof,
+      topic,
+      id,
+    });
+
+  } catch (error) {
+    console.error("Error in POST function:", error);
+    return NextResponse.json(
+      { status: 500, success: false, message: "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+async function processInBackground(data) {
+  try {
+    console.log("Processing in background");
+
+    const { name, email, number, alternateNumber, instituteId, instituteName, paymentProof, topic, id } = data;
 
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -55,7 +97,10 @@ export async function POST(request, { params }) {
       ],
     });
 
+    console.log("Google auth initialized");
+
     const imageUrl = await uploadImageToDrive(auth, paymentProof);
+    console.log("Image URL:", imageUrl);
 
     const sheets = google.sheets({ auth, version: "v4" });
 
@@ -63,10 +108,12 @@ export async function POST(request, { params }) {
       spreadsheetId: id,
       range: "Sheet1!A:A",
     });
+    console.log("Last row retrieved:", lastRow.data.values);
+
     const nextRow = lastRow.data.values ? lastRow.data.values.length + 1 : 1;
+    console.log("Next row:", nextRow);
 
-
-    const response = await sheets.spreadsheets.values.append({
+    await sheets.spreadsheets.values.append({
       spreadsheetId: id,
       range: `Sheet1!A${nextRow}:G${nextRow}`,
       valueInputOption: "USER_ENTERED",
@@ -75,28 +122,32 @@ export async function POST(request, { params }) {
       },
     });
 
-    return NextResponse.json({
-      status: 200,
-      success: true,
-      data: response.data,
-    });
+    console.log("Data appended to Google Sheets");
+
   } catch (error) {
-    console.error("Google Sheets Error:", error);
-    return NextResponse.json(
-      { status: 500, success: false, message: "Something went wrong" },
-      { status: 500 }
-    );
+    console.error("Error in background task:", error);
+    throw error;
   }
 }
 
+
+
 async function uploadImageToDrive(auth, paymentProof) {
+  console.log("Uploading image to Drive");
+
   const drive = google.drive({ version: "v3", auth });
 
-  const fileMetadata = { name: paymentProof.name, parents: [process.env.GOOGLE_DRIVE_ID] };
+  const fileMetadata = {
+    name: paymentProof.name,
+    parents: [process.env.GOOGLE_DRIVE_ID],
+  };
   const media = {
     mimeType: paymentProof.type,
-    body: paymentProof.stream ? paymentProof.stream() : paymentProof.buffer(), // Fallback to buffer if stream doesn't work
+    body: paymentProof.stream ? paymentProof.stream() : paymentProof.buffer(),
   };
+
+  console.log("File metadata:", fileMetadata);
+  console.log("Media type:", media.mimeType);
 
   let retries = 3;
   while (retries > 0) {
@@ -107,19 +158,19 @@ async function uploadImageToDrive(auth, paymentProof) {
         fields: "id",
       });
 
-    
+      console.log("File uploaded to Drive:", file.data.id);
+
       await drive.permissions.create({
         fileId: file.data.id,
         requestBody: { role: "reader", type: "anyone" },
       });
 
- 
       return `https://drive.google.com/uc?id=${file.data.id}`;
     } catch (error) {
       console.error("Drive upload error (retries left:", retries, "):", error);
       retries--;
       if (retries === 0) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 5000)); // Retry after a delay
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 }
