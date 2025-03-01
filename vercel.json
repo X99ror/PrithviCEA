@@ -1,8 +1,0 @@
-{
-    "functions": {
-      "api/submit/*": {
-        "timeout": 30
-      }
-    }
-  }
-  
