@@ -53,37 +53,7 @@ export async function POST(request, { params }) {
 
     console.log("Payment proof found");
 
-    return NextResponse.json({
-      status: 200,
-      success: true,
-      message: "Processing your request, you will be notified soon.",
-    });
-
-    await addToQueue({
-      name,
-      email,
-      number,
-      alternateNumber,
-      instituteId,
-      instituteName,
-      paymentProof,
-      topic,
-      id,
-    });
-
-  } catch (error) {
-    console.error("Error in POST function:", error);
-    return NextResponse.json(
-      { status: 500, success: false, message: "Something went wrong" },
-      { status: 500 }
-    );
-  }
-}
-async function processInBackground(data) {
-  try {
     console.log("Processing in background");
-
-    const { name, email, number, alternateNumber, instituteId, instituteName, paymentProof, topic, id } = data;
 
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -124,13 +94,20 @@ async function processInBackground(data) {
 
     console.log("Data appended to Google Sheets");
 
+    return NextResponse.json({
+      status: 200,
+      success: true,
+      message: "Processing your request, you will be notified soon.",
+    });
+
   } catch (error) {
     console.error("Error in background task:", error);
-    throw error;
+    return NextResponse.json(
+      { status: 500, success: false, message: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }
-
-
 
 async function uploadImageToDrive(auth, paymentProof) {
   console.log("Uploading image to Drive");
