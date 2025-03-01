@@ -1,5 +1,11 @@
 {
     "version": 2,
+    "builds": [
+      {
+        "src": "api/submit/*",
+        "use": "@vercel/node"
+      }
+    ],
     "functions": {
       "api/submit/*": {
         "maxDuration": 30
